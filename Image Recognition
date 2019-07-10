@@ -1,0 +1,542 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "name": "Project(Image).ipynb",
+      "version": "0.3.2",
+      "provenance": [],
+      "collapsed_sections": [],
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/oforisml/Number-Recognition/blob/master/Image%20Recognition\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "BPVLLdWRY_MZ",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "from __future__ import absolute_import, division, print_function, unicode_literals\n",
+        "\n",
+        "# TENSORFLOW AND KERAS\n",
+        "import tensorflow as tf\n",
+        "from tensorflow import keras\n",
+        "from keras.layers import Activation, Dense, Input, Dropout, Flatten, Conv2D, MaxPooling2D\n",
+        "from keras.models import Model, Sequential\n",
+        "from keras import optimizers\n",
+        "\n",
+        "\n",
+        "# For arrays\n",
+        "import numpy as np\n",
+        "from numpy import asarray\n",
+        "\n",
+        "#For Plotting graphs\n",
+        "import matplotlib.pyplot as plt\n",
+        "\n",
+        "\n",
+        "\n",
+        "from PIL import Image \n",
+        "import pickle            #to save the models to be used without traing it before use"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "UsaWM5lJazEO",
+        "colab_type": "code",
+        "outputId": "8e809afd-a21d-4031-b099-6231244e6ab3",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 34
+        }
+      },
+      "source": [
+        "#IMPORTING DATAPATH\n",
+        "from google.colab import drive\n",
+        "drive.mount(\"/content/gdrive\")\n",
+        "data_path = '/content/gdrive/My Drive/Colab Notebooks/ProjectImages'"
+      ],
+      "execution_count": 25,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "Drive already mounted at /content/gdrive; to attempt to forcibly remount, call drive.mount(\"/content/gdrive\", force_remount=True).\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "zR_YwGMA43L0",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        ""
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab_type": "code",
+        "id": "Rxj136cv43sl",
+        "colab": {}
+      },
+      "source": [
+        "# *****************************     LOADING THE DATA  *********************************\n",
+        "# Loadlocal_mnist(images_path, labels_path)           \n",
+        "# Read MNIST from ubyte files.\n",
+        "\n",
+        "\n",
+        "from mlxtend.data import loadlocal_mnist\n",
+        "X_train, y_train = loadlocal_mnist(images_path='/content/gdrive/My Drive/Colab Notebooks/ProjectImages/train-images.idx3-ubyte',\n",
+        "                      labels_path='/content/gdrive/My Drive/Colab Notebooks/ProjectImages/train-labels.idx1-ubyte')\n",
+        "X_test, y_test = loadlocal_mnist(images_path='/content/gdrive/My Drive/Colab Notebooks/ProjectImages/t10k-images.idx3-ubyte',\n",
+        "                                 labels_path=\"/content/gdrive/My Drive/Colab Notebooks/ProjectImages/t10k-labels.idx1-ubyte\")\n"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "vLgeZ7fhx-46",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "# DEALING WITH THE ORIGINAL DATA WITHOUT ANY TWEAKING\n",
+        "X_original_train_images = X_train.copy()\n",
+        "y_original_train_labels = y_train.copy()\n",
+        "\n",
+        "X_original_test_images = X_test.copy()\n",
+        "y_original_test_labels = y_test.copy()\n",
+        "\n",
+        "\n",
+        "\n"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab_type": "code",
+        "outputId": "26818ccb-2655-40a5-9346-1816d364054e",
+        "id": "soP4HDcA43s-",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 104
+        }
+      },
+      "source": [
+        "print('Training Images Diamensions:  {} x {}'.format(X_original_train_images.shape[0], X_original_train_images.shape[1]))\n",
+        "print('Training Labels Diamensions:  {} x {}'.format(y_original_train_labels.shape[0],\"None\"))\n",
+        "\n",
+        "print('Numbers 0 1 2 3 4 5 6 7 8 9')\n",
+        "print(\"Labels {}\".format(np.unique(y_original_train_labels)))\n",
+        "print(\"Class Dist. {}\".format(np.bincount(y_original_train_labels)))\n"
+      ],
+      "execution_count": 28,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "Training Images Diamensions:  60000 x 784\n",
+            "Training Labels Diamensions:  60000 x None\n",
+            "Numbers 0 1 2 3 4 5 6 7 8 9\n",
+            "Labels [0 1 2 3 4 5 6 7 8 9]\n",
+            "Class Dist. [5923 6742 5958 6131 5842 5421 5918 6265 5851 5949]\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "fQa5D3D1TcE8",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        ""
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "JP4ySBES7pe3",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        ""
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "Bae1kBLKbr-T",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 330
+        },
+        "outputId": "90fd224a-1189-4782-8316-4c1c26ec3e69"
+      },
+      "source": [
+        "# ******** S E Q U E N T I A L   D A T A   M O D E L *********\n",
+        "\n",
+        "# CREATING THE MODEL \n",
+        "SHAPE = 28*28\n",
+        "model = keras.Sequential([\n",
+        "    keras.layers.Dense(SHAPE, input_shape=(SHAPE,)),\n",
+        "    keras.layers.Dense(300, activation='sigmoid'),\n",
+        "    keras.layers.Dense(10, activation='softmax')\n",
+        "])\n",
+        "\n",
+        "\n",
+        "#*********************    COMPILING THE MODE        *************************\n",
+        "LEARNING_RATE = 0.0005\n",
+        "model.compile(optimizer=keras.optimizers.Adam(lr=LEARNING_RATE),\n",
+        "              loss='sparse_categorical_crossentropy',\n",
+        "              metrics=['accuracy']              \n",
+        "             )\n",
+        "\n",
+        "\n",
+        "\n",
+        "# ********************      TRAINING THE MODEL      *************************\n",
+        "EPOCHS = 20\n",
+        "BATCH_SIZE=50\n",
+        "\n",
+        "history_original_data = model.fit(X_original_train_images, y_original_train_labels, epochs=EPOCHS, batch_size=BATCH_SIZE) \n",
+        "hist_original=history_original_data.history\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "### PICKLE TO SAVE THE MODEL TO BE USED WITHOU PRO-TRAINING IT\n",
+        "pickelmodel = model\n",
+        "PickleSeq = open(pickname, 'wb')\n",
+        "pickname =\"SequentialNeuroNetwork.sav\"\n",
+        "pickle.dump(picklemodel, PickleSeq)\n",
+        "\n",
+        "\n"
+      ],
+      "execution_count": 0,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "Epoch 1/20\n",
+            "60000/60000 [==============================] - 12s 207us/sample - loss: 0.5029 - acc: 0.8653\n",
+            "Epoch 2/20\n",
+            "60000/60000 [==============================] - 12s 203us/sample - loss: 0.3473 - acc: 0.8999\n",
+            "Epoch 3/20\n",
+            "60000/60000 [==============================] - 12s 196us/sample - loss: 0.3357 - acc: 0.9037\n",
+            "Epoch 4/20\n",
+            "60000/60000 [==============================] - 12s 197us/sample - loss: 0.3428 - acc: 0.9013\n",
+            "Epoch 5/20\n",
+            "60000/60000 [==============================] - 12s 199us/sample - loss: 0.3468 - acc: 0.9005\n",
+            "Epoch 6/20\n",
+            "60000/60000 [==============================] - 12s 201us/sample - loss: 0.3351 - acc: 0.9010\n",
+            "Epoch 7/20\n",
+            "60000/60000 [==============================] - 12s 205us/sample - loss: 0.3180 - acc: 0.9071\n",
+            "Epoch 8/20\n",
+            "60000/60000 [==============================] - 12s 206us/sample - loss: 0.3084 - acc: 0.9085\n",
+            "Epoch 9/20\n",
+            "15750/60000 [======>.......................] - ETA: 9s - loss: 0.3157 - acc: 0.9072"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "5YWzWViX7ytB",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        ""
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "JOA1ldG87yPd",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        ""
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "2suNpAXdKRLg",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "\n",
+        "#***********A U T O E N C O D E R   M O D E L ********** \n",
+        "\n",
+        "# CREATING AUTOENCODER MODEL  (Different from the sequential data)\n",
+        "\n",
+        "X_train_ae=X_train.copy()\n",
+        "y_train_ae=y_train.copy()\n",
+        "\n",
+        "X_test_ae=X_test.copy()\n",
+        "y_test_ae=y_test.copy()\n",
+        "\n",
+        "\n",
+        "\n",
+        "original_dim = SHAPE  #784\n",
+        "\n",
+        "autoencoder=Sequential()\n",
+        "autoencoder.add(Dense(512, activation='elu', input_shape=(SHAPE,)))\n",
+        "autoencoder.add(Dense(128, activation='elu'))\n",
+        "autoencoder.add(Dense(10, activation='linear', name='latent_layer'))\n",
+        "autoencoder.add(Dense(128, activation='elu'))\n",
+        "autoencoder.add(Dense(512, activation='elu'))\n",
+        "autoencoder.add(Dense(SHAPE, activation='sigmoid', name='end_layer'))\n",
+        "\n",
+        "encoder = Model(autoencoder.input, autoencoder.get_layer('latent_layer').output)\n",
+        "encoded_data  = encoder.predict(X_train_ae)   # BOTTLE-NECK OR LATENT   \n",
+        "decoded_output= autoencoder.predict(X_train_ae) # ENCODED DATA FROM THE WHOLE ALGORITHM\n",
+        "\n",
+        "\n",
+        "latent_dim = 10\n",
+        "\n",
+        "inputs=Input(shape=(latent_dim,))\n",
+        "\n",
+        "decoder=autoencoder.layers[-3](inputs)\n",
+        "decoder=autoencoder.layers[-2](decoder)\n",
+        "decoder=autoencoder.layers[-1](decoder)\n",
+        "decoder=Model(inputs, decoder)\n",
+        "\n",
+        "OPTIMIZER=optimizers.Adam(lr=LEARNING_RATE)\n",
+        "autoencoder_history=autoencoder.compile(loss='binary_crossentropy', optimizer=OPTIMIZER, metrics=['acc'])\n",
+        "\n",
+        "\n",
+        "# OPTIMIZER: ADAM   sigmoid = .8     loss: 0.12\n",
+        "#                   softmax = .808   loss: 0.66\n",
+        "\n",
+        "\n",
+        "\n",
+        "X_train_ae=X_train_ae.reshape(X_train.shape[0], X_train.shape[1])/255\n",
+        "X_val_ae     =X_test_ae.reshape(X_test.shape[0], X_test.shape[1])/255\n",
+        "\n",
+        "history_ae = autoencoder.fit(X_train_ae, X_train_ae, batch_size=BATCH_SIZE,epochs=EPOCHS, validation_data=(X_val_ae,X_val_ae))\n",
+        "\n",
+        "\n",
+        "hist_ae = history_ae.history\n",
+        "\n",
+        "\n",
+        "\n",
+        "### PICKLE TO SAVE THE MODEL TO BE USED WITHOU PRO-TRAINING IT\n",
+        "pickelmodel = autoencoder\n",
+        "PickleAuto = open(pickname, 'wb')\n",
+        "pickname =\"AutoencoderNeuroNetwork.sav\"\n",
+        "pickle.dump(picklemodel, PickleAuto)\n"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "6r7ursPc9UXi",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        ""
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "-spl_UwY8a_F",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        ""
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "b3hTyNob9T2E",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "#   ***********  C O N V O L U T I O N A L   N E U R O N E T W O R K    ****************\n",
+        "\n",
+        "\n",
+        "X_train_conv = X_train.copy()\n",
+        "X_test_conv  = X_test.copy()\n",
+        "y_train_conv = y_train.copy()\n",
+        "y_test_conv  = y_test.copy()\n",
+        "\n",
+        "out_num= 10   # 0-9\n",
+        "#Building the convolution Network with 2 X 2 Conv2Ds\n",
+        "model_Conv2D=Sequential()\n",
+        "model_Conv2D.add(Conv2D(16, kernel_size=(3,3), activation='relu', input_shape=(28,28,1)))\n",
+        "model_Conv2D.add(Conv2D(32, (3,3), activation='relu'))\n",
+        "model_Conv2D.add(MaxPooling2D(pool_size=(2,2)))\n",
+        "model_Conv2D.add(Dropout(.5))\n",
+        "model_Conv2D.add(Conv2D(64, (3,3), activation='relu'))\n",
+        "model_Conv2D.add(Conv2D(64, (3,3), activation='relu'))\n",
+        "model_Conv2D.add(MaxPooling2D(pool_size=(2,2)))\n",
+        "model_Conv2D.add(Dropout(0.5))  #What it means\n",
+        "model_Conv2D.add(Flatten())\n",
+        "model_Conv2D.add(Dense(128, activation='relu'))\n",
+        "model_Conv2D.add(Dropout(0.5))\n",
+        "model_Conv2D.add(Dense(out_num, activation='softmax'))\n",
+        "\n",
+        "OPTIMIZER=optimizers.Adam(lr=LEARNING_RATE)  # Learning_rate(lr=0.0005)\n",
+        "model_Conv2D.compile(loss='binary_crossentropy', optimizer=OPTIMIZER, \n",
+        "                     metrics=['accuracy', 'binary_crossentropy'])\n",
+        "\n",
+        "\n",
+        "X_train_conv=X_train_conv.reshape(60000,28,28,1)/255\n",
+        "X_test_conv=X_test_conv.reshape(10000,28,28,1)/255\n",
+        "\n",
+        "mean, std=X_train_conv.mean(), X_train_conv.std()\n",
+        "\n",
+        "y_train_conv=keras.utils.to_categorical(y_train_conv,out_num)\n",
+        "y_test_conv=keras.utils.to_categorical(y_test_conv,out_num)\n",
+        "\n",
+        "history=model_Conv2D.fit(X_train_conv, y_train_conv, epochs=EPOCHS, batch_size=BATCH_SIZE)\n",
+        "\n",
+        "model_Conv2D.summary()\n",
+        "history_Conv2D=history.history\n",
+        "\n",
+        "\n",
+        "### PICKLE TO SAVE THE MODEL TO BE USED WITHOU PRO-TRAINING IT\n",
+        "pickelmodel = model_Conv2D\n",
+        "PickleConv = open(pickname, 'wb')\n",
+        "pickname =\"ConvolutionNeuroNetwork.sav\"\n",
+        "pickle.dump(picklemodel, PickleConv)"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "pTucv5Nw_J0O",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        ""
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "6vcASECimmTV",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        ""
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "ShXPaooNnOmO",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "#################################################################\n",
+        "############   I M A G E   N O R M A L I Z A T I O N   ##########\n",
+        "\n",
+        "img=(Image.open(\"/content/gdrive/My Drive/Colab Notebooks/ProjectImages/images/9d.png\"))\n",
+        "# img_pixels=img.astype('float32')\n",
+        "img_pixels=np.invert((img).convert('L'))\n",
+        "input_s=img_pixels.reshape(1,28,28,1)\n",
+        "pred=model_Conv2D.predict(input_s)\n",
+        "print(np.argmax(pred))"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "R-65_bQPg3-P",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        ""
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "IryPWEgXiOhs",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        ""
+      ],
+      "execution_count": 0,
+      "outputs": []
+    }
+  ]
+}
