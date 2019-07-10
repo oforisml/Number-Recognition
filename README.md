@@ -39,5 +39,8 @@ It contains three main neuro-network architectures
 3. Convolution Neuro-Network  - This is a 2D-CNN which will enable us give very good predictions.
 
 
+VISION
+This project will be built upon to make a model that will be able to detect
+not only digits but also alphabeths and some symbols if not all.
 
 
